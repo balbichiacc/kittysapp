@@ -1,17 +1,11 @@
 import express from "express";
-import {
-  getProfile,
-  updateProfile,
-  searchUsers,
-  checkAuth,
-} from "../controllers/userController.js";
-import authMiddleware from "../middleware/authMiddleware.js";
+import { updateProfile, searchUsers } from "../controllers/userController.js";
+import { upload } from "../middleware/upload.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/me", authMiddleware, getProfile);
-router.put("/update", authMiddleware, updateProfile);
-router.get("/search", authMiddleware, searchUsers);
-router.get("/check", checkAuth);
+router.put("/update", protect, upload.single("profilePic"), updateProfile);
+router.get("/search", protect, searchUsers);
 
 export default router;

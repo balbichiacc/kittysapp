@@ -2,19 +2,18 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Create "uploads/audio" if not exists
-const audioUploadPath = path.resolve("uploads/audio");
-if (!fs.existsSync(audioUploadPath)) {
-  fs.mkdirSync(audioUploadPath, { recursive: true });
-}
+// Ensure uploads folder exists
+const uploadDir = path.resolve("uploads");
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/audio");
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
   },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+    cb(null, uniqueName);
   },
 });
 

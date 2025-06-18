@@ -1,17 +1,18 @@
-import express from "express";
-import {
-  createGroup,
-  getUserGroups,
-  addGroupMember,
-  removeGroupMember,
-} from "../controllers/groupController.js";
-import authMiddleware from "../middleware/authMiddleware.js";
+import Group from "../models/Group.js";
 
-const router = express.Router();
+export const updateGroup = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { name, members } = req.body;
 
-router.post("/create", authMiddleware, createGroup);
-router.get("/my-groups", authMiddleware, getUserGroups);
-router.put("/add/:groupId", authMiddleware, addGroupMember);
-router.put("/remove/:groupId", authMiddleware, removeGroupMember);
+    const updatedGroup = await Group.findByIdAndUpdate(
+      groupId,
+      { name, members },
+      { new: true }
+    ).populate("members", "-password");
 
-export default router;
+    res.json(updatedGroup);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update group", error: err.message });
+  }
+};

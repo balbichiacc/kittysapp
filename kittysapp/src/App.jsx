@@ -1,30 +1,32 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "./contexts/AuthContext";
-import LoginPage from "./pages/LoginPage";
-import HomePage from "./pages/HomePage";
-import ProfilePage from "./pages/ProfilePage";
-import ChatContainer from "./components/ChatContainer";
-import CallModal from "./components/CallModal";
-import VideoCallScreen from "./components/VideoCallScreen";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { ChatProvider } from "./context/ChatContext";
+import { ThemeProvider } from "./context/ThemeContext";
+
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import NotFound from "./pages/NotFound";
+
+import "./styles/index.css";
 
 const App = () => {
-  const { user } = useAuth();
-
   return (
-    <>
-      <Routes>
-        <Route path="/" element={user ? <Navigate to="/home" /> : <LoginPage />} />
-        <Route path="/home" element={user ? <HomePage /> : <Navigate to="/" />} />
-        <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/" />} />
-        <Route path="/chat/:chatId" element={user ? <ChatContainer /> : <Navigate to="/" />} />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-
-      {/* Global UI elements */}
-      <CallModal />
-      <VideoCallScreen />
-    </>
+    <ThemeProvider>
+      <AuthProvider>
+        <ChatProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Router>
+        </ChatProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 

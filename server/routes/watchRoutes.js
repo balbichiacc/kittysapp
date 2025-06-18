@@ -1,15 +1,10 @@
 import express from "express";
-import {
-  startWatchSession,
-  updateWatchSession,
-  getWatchSessions,
-} from "../controllers/watchController.js";
-import authMiddleware from "../middleware/authMiddleware.js";
+import { addWatchSession, getWatchHistory } from "../controllers/watchController.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/start", authMiddleware, startWatchSession);
-router.put("/update/:sessionId", authMiddleware, updateWatchSession);
-router.get("/group/:groupId", authMiddleware, getWatchSessions);
+router.post("/", protect, addWatchSession);
+router.get("/:groupId", protect, getWatchHistory);
 
 export default router;
