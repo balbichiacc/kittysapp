@@ -1,154 +1,77 @@
-import React, { useState } from 'react';
-import assets from '../assets/assets';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import axios from "axios";
 
 const LoginPage = () => {
-  const [currState, setCurrState] = useState("Sign up");
-  const [prevStateBeforeBio, setPrevStateBeforeBio] = useState("Sign up");
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [bio, setBio] = useState("");
-  const [isDataSubmitted, setIsDataSubmitted] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({ username: "", password: "", fullName: "" });
 
-  const onSubmitHandler = (event) => {
-    event.preventDefault();
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    if (currState === 'Sign up' && !isDataSubmitted) {
-      setPrevStateBeforeBio(currState); // Store where user came from
-      setIsDataSubmitted(true);
-      return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const endpoint = isLogin ? "/api/auth/login" : "/api/auth/signup";
+    try {
+      const res = await axios.post(endpoint, formData);
+      console.log("Success:", res.data);
+      // store token, redirect, etc.
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong");
     }
-
-    // Add logic for actual login/signup submission
   };
 
   return (
-    <div className='min-h-screen bg-cover bg-center flex items-center justify-center gap-8 sm:justify-evenly max-sm:flex-col backdrop-blur-2xl'>
-
-      {/* Left Section */}
-      <img src={assets.logo_big} alt="App Logo" className='w-[min(30vw,250px)]' />
-
-      {/* Right Section */}
-      <form onSubmit={onSubmitHandler} className='border-2 bg-white/8 text-white border-gray-500 p-6 flex flex-col gap-6 rounded-lg shadow-lg'>
-
-        {/* Header */}
-        <h2 className='font-medium text-2xl flex justify-between items-center'>
-          {currState}
-          {isDataSubmitted && (
-            <img
-              src={assets.arrow_icon}
-              alt="Back"
-              className='w-5 cursor-pointer'
-              onClick={() => {
-                // Go back to form mode from bio
-                setCurrState(prevStateBeforeBio);
-                setIsDataSubmitted(false);
-              }}
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center">
+      <motion.div
+        className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md"
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 100 }}
+      >
+        <h1 className="text-3xl font-bold text-center text-purple-700 mb-6">
+          {isLogin ? "Login" : "Sign Up"}
+        </h1>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {!isLogin && (
+            <input
+              name="fullName"
+              type="text"
+              placeholder="Full Name"
+              onChange={handleChange}
+              required
+              className="w-full p-3 border rounded-xl"
             />
           )}
-        </h2>
-
-        {/* Full Name */}
-        {currState === "Sign up" && !isDataSubmitted && (
           <input
-            onChange={(e) => setFullName(e.target.value)}
-            value={fullName}
+            name="username"
             type="text"
-            className='p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
-            placeholder='Full Name'
+            placeholder="Username"
+            onChange={handleChange}
             required
+            className="w-full p-3 border rounded-xl"
           />
-        )}
-
-        {/* Email & Password */}
-        {!isDataSubmitted && (
-          <>
-            <input
-              onChange={(e) => setEmail(e.target.value)}
-              value={email}
-              type="email"
-              placeholder='Email Address'
-              required
-              className='p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
-            />
-            <input
-              onChange={(e) => setPassword(e.target.value)}
-              value={password}
-              type="password"
-              placeholder='Password'
-              required
-              className='p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
-            />
-          </>
-        )}
-
-        {/* Bio Section */}
-        {currState === "Sign up" && isDataSubmitted && (
-          <textarea
-            onChange={(e) => setBio(e.target.value)}
-            value={bio}
-            rows={4}
-            className='p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
-            placeholder='Provide a short bio...'
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            onChange={handleChange}
             required
-          ></textarea>
-        )}
-
-        {/* Submit Button */}
-        <button
-          type='submit'
-          className='py-3 bg-gradient-to-r from-purple-400 to-violet-600 text-white rounded-md cursor-pointer'
-          onClick={(e) => {
-            e.preventDefault();
-            const form = e.target.closest('form');
-            if (form.checkValidity()) {
-              if (currState === "Sign up" && !isDataSubmitted) {
-                setPrevStateBeforeBio(currState); // Capture before showing bio
-                setIsDataSubmitted(true);
-              }
-              // Future: Add API logic here
-            } else {
-              form.reportValidity(); // Show required field messages
-            }
-          }}
-        >
-          {currState === "Sign up" ? "Create Account" : "Login Now"}
-        </button>
-
-        {/* Terms */}
-        <div className='flex items-center gap-2 text-sm text-gray-500'>
-          <input type="checkbox" required />
-          <p>Agree to the terms of use & privacy policy.</p>
-        </div>
-
-        {/* Switch between Sign up and Login */}
-        <div className='flex flex-col gap-2'>
-          {currState === "Sign up" ? (
-            <p className='text-sm text-gray-600'>
-              Already have an account?
-              <span
-                onClick={() => {
-                  setCurrState("Login");
-                  setIsDataSubmitted(false);
-                }}
-                className='font-medium text-violet-500 cursor-pointer'
-              > Login here</span>
-            </p>
-          ) : (
-            <p className='text-sm text-gray-600'>
-              Create an account
-              <span
-                onClick={() => {
-                  setCurrState("Sign up");
-                  setIsDataSubmitted(false);
-                }}
-                className='font-medium text-violet-500 cursor-pointer'
-              > Click here</span>
-            </p>
-          )}
-        </div>
-
-      </form>
+            className="w-full p-3 border rounded-xl"
+          />
+          <button type="submit" className="bg-purple-600 text-white py-3 w-full rounded-xl">
+            {isLogin ? "Login" : "Create Account"}
+          </button>
+        </form>
+        <p className="text-center mt-4">
+          {isLogin ? "New here?" : "Already have an account?"}{" "}
+          <span
+            className="text-purple-700 font-bold cursor-pointer"
+            onClick={() => setIsLogin(!isLogin)}
+          >
+            {isLogin ? "Sign Up" : "Login"}
+          </span>
+        </p>
+      </motion.div>
     </div>
   );
 };

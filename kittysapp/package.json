@@ -2,6 +2,7 @@
   "name": "kittysapp",
   "private": true,
   "version": "0.0.0",
+  "proxy": "http://localhost:5000",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,9 +12,17 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.10",
+    "emoji-picker-react": "^4.12.2",
+    "framer-motion": "^12.18.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-dropzone": "^14.3.8",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^7.6.2",
+    "react-toastify": "^11.0.5",
+    "react-youtube": "^10.1.0",
+    "simple-peer": "^9.11.1",
+    "socket.io-client": "^4.8.1",
     "tailwindcss": "^4.1.10"
   },
   "devDependencies": {

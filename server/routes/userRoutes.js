@@ -1,12 +1,17 @@
 import express from "express";
-import { checkAuth, login, signup, updateProfile } from "../controllers/userController.js";
-import { protectRoute } from "../middleware/auth.js";
+import {
+  getProfile,
+  updateProfile,
+  searchUsers,
+  checkAuth,
+} from "../controllers/userController.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
-const userRouter = express.Router();
+const router = express.Router();
 
-userRouter.post("/signup", signup);
-userRouter.post("/login", login);
-userRouter.put("/update-profile", protectRoute, updateProfile);
-userRouter.get("/check", protectRoute, checkAuth);
+router.get("/me", authMiddleware, getProfile);
+router.put("/update", authMiddleware, updateProfile);
+router.get("/search", authMiddleware, searchUsers);
+router.get("/check", checkAuth);
 
-export default userRouter;
+export default router;

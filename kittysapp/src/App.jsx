@@ -1,21 +1,31 @@
-import React from 'react'
-import { Route, Routes } from 'react-router-dom'
-
-import HomePage from "/src/pages/HomePage.jsx";
-import LoginPage from "/src/pages/LoginPage.jsx";
-import ProfilePage from "/src/pages/ProfilePage.jsx";
-
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./contexts/AuthContext";
+import LoginPage from "./pages/LoginPage";
+import HomePage from "./pages/HomePage";
+import ProfilePage from "./pages/ProfilePage";
+import ChatContainer from "./components/ChatContainer";
+import CallModal from "./components/CallModal";
+import VideoCallScreen from "./components/VideoCallScreen";
 
 const App = () => {
-  return (
-    <div className="bg-[url('./src/assets/bgImage.svg')] bg-contain">
-      <Routes>
-        <Route path='/' element={<HomePage />}/>
-        <Route path='/login' element={<LoginPage />}/>
-        <Route path='/profile' element={<ProfilePage />}/>
-        </Routes>
-    </div>
-  )
-}
+  const { user } = useAuth();
 
-export default App
+  return (
+    <>
+      <Routes>
+        <Route path="/" element={user ? <Navigate to="/home" /> : <LoginPage />} />
+        <Route path="/home" element={user ? <HomePage /> : <Navigate to="/" />} />
+        <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/" />} />
+        <Route path="/chat/:chatId" element={user ? <ChatContainer /> : <Navigate to="/" />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+
+      {/* Global UI elements */}
+      <CallModal />
+      <VideoCallScreen />
+    </>
+  );
+};
+
+export default App;

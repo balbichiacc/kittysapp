@@ -1,101 +1,57 @@
-import React, { useRef, useEffect } from 'react';
-import assets, { messagesDummyData } from '../assets/assets';
-import { formatMessageTime } from '../lib/Utils';
+import React, { useContext, useEffect, useState } from "react"; import { AuthContext } from "../context/AuthContext"; import { ChatContext } from "../context/ChatContext"; import { SocketContext } from "../context/SocketContext"; import WatchTogether from "./WatchTogether/WatchTogether";
 
-const ChatContainer = ({ selectedUser, setSelectedUser }) => {
-  const scrollEnd = useRef();
+const ChatContainer = () => { const { currentUser } = useContext(AuthContext); const { selectedChat, messages, sendMessage, groupAdminId } = useContext(ChatContext); const socket = useContext(SocketContext);
 
-  useEffect(() => {
-    if (scrollEnd.current) {
-      scrollEnd.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, []);
+const [newMessage, setNewMessage] = useState("");
 
-  return selectedUser ? (
-    <div className='h-full overflow-scroll relative backdrop-blur-lg'>
-      {/* Header */}
-      <div className='flex items-center gap-3 py-3 mx-4 border-b border-stone-500'>
-        <img src={assets.profile_martin} alt="" className='w-8 rounded-full' />
-        <p className='flex-1 text-lg text-white flex items-center gap-2'>
-          Martin Johnson
-          <span className='w-2 h-2 rounded-full bg-green-500'></span>
-        </p>
-        <img
-          onClick={() => setSelectedUser(null)}
-          src={assets.arrow_icon}
-          alt=""
-          className='md:hidden max-w-7'
-        />
-        <img src={assets.help_icon} alt="" className='max-md:hidden max-w-5' />
-      </div>
+const handleSend = () => { if (newMessage.trim()) { sendMessage(newMessage); setNewMessage(""); } };
 
-      {/* Chat area */}
-      <div className='flex flex-col h-[calc(100%-120px)] overflow-y-scroll p-3 pb-6'>
-        {messagesDummyData.map((msg, index) => (
-          <div
-            key={index}
-            className={`flex items-end gap-2 justify-end ${
-              msg.senderId !== '680f50e4f10f3cd28382ecf9' && 'flex-row-reverse'
-            }`}
-          >
-            {msg.image ? (
-              <img
-                src={msg.image}
-                alt=""
-                className='max-w-[230px] border border-gray-700 rounded-lg overflow-hidden mb-8'
-              />
-            ) : (
-              <p
-                className={`p-2 max-w-[200px] md:text-sm font-light rounded-lg mb-8 break-all bg-violet-500/30 text-white ${
-                  msg.senderId === '680f50e4f10f3cd28382ecf9'
-                    ? 'rounded-br-none'
-                    : 'rounded-bl-none'
-                }`}
-              >
-                {msg.text}
-              </p>
-            )}
-            <div className='text-center text-xs'>
-              <img
-                src={
-                  msg.senderId === '680f50e4f10f3cd28382ecf9'
-                    ? assets.avatar_icon
-                    : assets.profile_martin
-                }
-                alt=""
-                className='w-7 rounded-full'
-              />
-              <p className='text-gray-500'>
-                {formatMessageTime(msg.createdAt)}
-              </p>
-            </div>
-          </div>
-        ))}
-        <div ref={scrollEnd}></div>
-      </div>
-        {/*--------bottom area------*/}
-      <div className='absolute bottom-0 left-0 right-0 flex items-center gap-3 p-3'>
-        <div className='flex-1 flex items-center bg-gray-100/12 px-3 rounded-full'>
-          <input type="text" placeholder="Send a message" 
-          className='flex-1 text-sm p-3 border-none rounded-lg outline-none
-          text-white placeholder-gray-400'/>
-          <input type="file" id='image' accept='image/png, image/jpeg' hidden />
-          <label htmlFor='image'>
-            <img src={assets.gallery_icon} alt="" className='w-5 mr-2
-            cursor-pointer' />
-          </label>
-        </div>
-         <img src={assets.send_button} alt="" className='w-7 cursor-pointer' />
-      </div>
+if (!selectedChat) { return <div className="flex-1 flex items-center justify-center text-gray-500">Select a chat to start messaging</div>; }
 
+const isGroup = selectedChat.isGroupChat; const isAdmin = currentUser._id === groupAdminId;
 
+return ( <div className="flex flex-col flex-1 p-4 overflow-hidden"> {/* Chat Header */} <div className="flex justify-between items-center mb-2"> <h2 className="text-xl font-semibold"> {isGroup ? selectedChat.chatName : selectedChat.users.find(u => u._id !== currentUser._id)?.username} </h2> </div>
+
+{/* Watch Together */}
+  {isGroup && (
+    <div className="mb-4">
+      <WatchTogether groupId={selectedChat._id} isAdmin={isAdmin} />
     </div>
-  ) : (
-    <div className='flex flex-col items-center justify-center gap-2 text-gray-500 bg-white/10 max-md:hidden'>
-      <img src={assets.logo_icon} className='max-w-16' alt="" />
-      <p className='text-lg font-medium text-white'>Chat anytime, anywhere</p>
-    </div>
-  );
-};
+  )}
+
+  {/* Messages */}
+  <div className="flex-1 overflow-y-auto mb-4">
+    {messages.map((msg, idx) => (
+      <div
+        key={idx}
+        className={`my-1 p-2 max-w-xs rounded-md text-sm ${
+          msg.sender === currentUser._id ? "bg-blue-600 text-white ml-auto" : "bg-gray-200 text-black mr-auto"
+        }`}
+      >
+        {msg.content}
+      </div>
+    ))}
+  </div>
+
+  {/* Message Input */}
+  <div className="flex items-center gap-2">
+    <input
+      type="text"
+      value={newMessage}
+      onChange={(e) => setNewMessage(e.target.value)}
+      placeholder="Type a message"
+      className="flex-1 p-2 border rounded-md"
+      onKeyDown={(e) => e.key === "Enter" && handleSend()}
+    />
+    <button
+      onClick={handleSend}
+      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+    >
+      Send
+    </button>
+  </div>
+</div>
+
+); };
 
 export default ChatContainer;
